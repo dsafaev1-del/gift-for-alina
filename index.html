@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Подарок</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: #0a0810;
+    color: #e8e2d5;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+
+  .sky {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 25% 15%, rgba(90, 70, 130, 0.32) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 85%, rgba(130, 80, 100, 0.25) 0%, transparent 55%),
+      linear-gradient(165deg, #0a0810 0%, #16111e 45%, #0a0810 100%);
+    z-index: 0;
+  }
+
+  .star {
+    position: fixed;
+    width: 1.5px;
+    height: 1.5px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0;
+    z-index: 1;
+    animation: twinkle linear infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50%      { opacity: 0.55; }
+  }
+
+  /* === КОТИКИ === */
+  .cat {
+    position: fixed;
+    bottom: 12px;
+    z-index: 2;
+    pointer-events: none;
+    user-select: none;
+    font-size: 42px;
+    line-height: 1;
+    filter:
+      drop-shadow(0 6px 4px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 0 12px rgba(255, 200, 150, 0.15));
+    animation: catWalk linear forwards;
+    will-change: left, transform;
+  }
+  @keyframes catWalk {
+    0%   { left: -80px; transform: translateY(0) rotate(0deg); }
+    25%  { transform: translateY(-6px) rotate(-2deg); }
+    50%  { left: 50vw;  transform: translateY(0) rotate(0deg); }
+    75%  { transform: translateY(-6px) rotate(2deg); }
+    100% { left: 110vw; transform: translateY(0) rotate(0deg); }
+  }
+
+  .cat-sit {
+    position: fixed;
+    bottom: 20px;
+    z-index: 2;
+    pointer-events: none;
+    user-select: none;
+    font-size: 52px;
+    line-height: 1;
+    filter:
+      drop-shadow(0 8px 6px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 16px rgba(255, 200, 150, 0.12));
+    animation: catIdle 4s ease-in-out infinite;
+  }
+  .cat-sit.left  { left: 22px; animation-delay: 0s; }
+  .cat-sit.right { right: 22px; animation-delay: 1.2s; }
+  @keyframes catIdle {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-4px) rotate(2deg); }
+  }
+
+  /* === КАРТОЧКА === */
+  .card {
+    position: relative;
+    z-index: 3;
+    background: rgba(18, 14, 24, 0.75);
+    backdrop-filter: blur(26px);
+    -webkit-backdrop-filter: blur(26px);
+    border: 1px solid rgba(201, 168, 130, 0.15);
+    border-radius: 4px;
+    padding: 58px 36px 52px;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    box-shadow:
+      0 40px 100px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(201, 168, 130, 0.08);
+    animation: cardIn 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a882, transparent);
+    opacity: 0.5;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card.fade-out {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  .progress {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 42px;
+  }
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(201, 168, 130, 0.18);
+    transition: all 0.5s ease;
+  }
+  .dot.active {
+    background: #c9a882;
+    box-shadow: 0 0 8px rgba(201, 168, 130, 0.6);
+  }
+  .dot.current {
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(201, 168, 130, 0.65);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 26px;
+    display: block;
+  }
+
+  .emoji-wrap {
+    margin-bottom: 26px;
+    display: block;
+  }
+  .emoji {
+    font-size: 44px;
+    display: inline-block;
+    opacity: 0.92;
+    filter:
+      drop-shadow(0 6px 4px rgba(0, 0, 0, 0.4))
+      drop-shadow(0 0 16px rgba(201, 168, 130, 0.35));
+    animation: softFloat 5s ease-in-out infinite;
+  }
+  @keyframes softFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  .ring-scene {
+    position: relative;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 26px;
+  }
+  .ring-glow {
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201, 168, 130, 0.35) 0%, transparent 65%);
+    animation: glowPulse 3.5s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50%      { transform: scale(1.15); opacity: 1; }
+  }
+  .ring {
+    font-size: 64px;
+    position: relative;
+    z-index: 2;
+    animation: ringShine 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 22px rgba(255, 220, 180, 0.85));
+  }
+  @keyframes ringShine {
+    0%, 100% { transform: scale(1) rotate(-3deg); }
+    50%      { transform: scale(1.06) rotate(3deg); }
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 500;
+    color: #f0eadd;
+    margin-bottom: 20px;
+    line-height: 1.3;
+    letter-spacing: 0.5px;
+  }
+  h1 .name {
+    display: block;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 20px;
+    color: #c9a882;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  p {
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(232, 226, 213, 0.82);
+    line-height: 1.85;
+    margin-bottom: 34px;
+    letter-spacing: 0.2px;
+  }
+  p em {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: #c9a882;
+  }
+  p .hint {
+    display: block;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(201, 168, 130, 0.12);
+    font-size: 12px;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    color: rgba(201, 168, 130, 0.6);
+    letter-spacing: 1px;
+  }
+
+  button {
+    background: transparent;
+    color: #c9a882;
+    border: 1px solid rgba(201, 168, 130, 0.4);
+    padding: 16px 38px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #c9a882, #b8929a);
+    opacity: 0;
+    transition: opacity 0.35s;
+    z-index: 0;
+  }
+  button:hover::before { opacity: 1; }
+  button:hover {
+    color: #0a0810;
+    border-color: transparent;
+    box-shadow: 0 10px 30px rgba(201, 168, 130, 0.25);
+  }
+  button:active { transform: scale(0.98); }
+  button span { position: relative; z-index: 1; }
+
+  .card.final {
+    background: linear-gradient(165deg, rgba(30, 20, 35, 0.9), rgba(15, 10, 20, 0.9));
+    border-color: rgba(201, 168, 130, 0.28);
+  }
+  .card.final h1 {
+    font-size: 34px;
+    background: linear-gradient(135deg, #f0eadd, #c9a882, #f0eadd);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 5s linear infinite;
+  }
+  @keyframes gradientShift {
+    to { background-position: 200% center; }
+  }
+
+  .music-btn {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    z-index: 10;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(201, 168, 130, 0.25);
+    color: #c9a882;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    padding: 0;
+  }
+  .music-btn:hover { background: rgba(201, 168, 130, 0.1); }
+  .music-btn.playing { animation: musicSpin 4s linear infinite; }
+  @keyframes musicSpin {
+    from { transform: rotate(0); }
+    to   { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<audio id="bgMusic" loop></audio>
+<button class="music-btn" id="musicBtn" title="Музыка">♪</button>
+
+<script>
+  // ============================================
+  //   НАСТРОЙКИ
+  // ============================================
+
+  const MUSIC_URL = "";
+
+  const steps = [
+
+    // 1
+    {
+      emoji: "✉",
+      step: "Начало",
+      title: "Привет, маинький",
+      text: "У меня для тебя небольшой подарок. Но просто так вручать — неинтересно, поэтому я спрятал его и оставил несколько подсказок. Ничего сложного, справишься легко.",
+      button: "Начать"
+    },
+
+    // 2
+    {
+      emoji: "🔑",
+      step: "Подсказка первая",
+      title: "Место, которое ты знаешь",
+      text: "Кое-что небольшое спрятано там, где моё рабочее место.",
+      hint: "Оглядись внимательно",
+      button: "Нашла"
+    },
+
+    // 3
+    {
+      emoji: "🚗",
+      step: "Подсказка вторая",
+      title: "Теперь дальше",
+      text: "Эти ключи — от машины. Она стоит во дворе. Открывай, садись внутрь и внимательно осмотрись.",
+      button: "Иду"
+    },
+
+    // 4
+    {
+      emoji: "🔍",
+      step: "Почти у цели",
+      title: "Рядом с тобой",
+      text: "Между креслами есть небольшое отделение под стаканы. Загляни внутрь.",
+      hint: "Подстаканник",
+      button: "Открыть"
+    },
+
+    // 5 — кольцо
+    {
+      emoji: "💍",
+      ring: true,
+      step: "Это оно",
+      title: "Твой подарок",
+      text: "Надеюсь, понравится. И да — на этом квест не заканчивается.",
+      button: "Дальше"
+    },
+
+    // 6 — обратно домой
+    {
+      emoji: "🏠",
+      step: "Обратно",
+      title: "Возвращайся",
+      text: "Возьми кольцо с собой и поднимись обратно в квартиру. Не спеши, у тебя всё время мира.",
+      button: "Иду домой"
+    },
+
+    // 7 — закрыть глаза
+    {
+      emoji: "✨",
+      step: "Последний шаг",
+      title: "Закрой глаза",
+      text: "Зайди в комнату. Закрой глаза и немного подожди. И пожалуйста — не подглядывай.",
+      button: "Закрыла"
+    }
+  ];
+
+  const finalScreen = {
+    step: "Всё",
+    title: "Открывай глаза",
+    text: "Я здесь. И очень рад, что ты у меня есть.",
+    button: "Открыть 🐱"
+  };
+
+  // ============================================
+  //   ЛОГИКА
+  // ============================================
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  document.body.appendChild(card);
+
+  let current = 0;
+  let isPlaying = false;
+
+  // === ЗВЁЗДЫ ===
+  for (let i = 0; i < 55; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.top = Math.random() * 100 + 'vh';
+    s.style.animationDuration = (3 + Math.random() * 5) + 's';
+    s.style.animationDelay = Math.random() * 8 + 's';
+    document.body.appendChild(s);
+  }
+
+  // === КОТИКИ ===
+  const sitLeft = document.createElement('div');
+  sitLeft.className = 'cat-sit left';
+  sitLeft.textContent = '🐱';
+  document.body.appendChild(sitLeft);
+
+  const sitRight = document.createElement('div');
+  sitRight.className = 'cat-sit right';
+  sitRight.textContent = '🐈';
+  document.body.appendChild(sitRight);
+
+  const catEmojis = ['🐈', '🐈‍⬛', '🐱', '🐈', '🐈‍⬛'];
+  function spawnCat() {
+    const c = document.createElement('div');
+    c.className = 'cat';
+    c.textContent = catEmojis[Math.floor(Math.random() * catEmojis.length)];
+    c.style.animationDuration = (12 + Math.random() * 6) + 's';
+    c.style.fontSize = (38 + Math.random() * 12) + 'px';
+    c.style.bottom = (8 + Math.random() * 24) + 'px';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 22000);
+  }
+  setInterval(spawnCat, 5200);
+  setTimeout(spawnCat, 800);
+  setTimeout(spawnCat, 2600);
+
+  // === КОНФЕТТИ ===
+  const confettiStyle = document.createElement('style');
+  confettiStyle.textContent = `
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+      100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(confettiStyle);
+
+  function burstConfetti() {
+    const colors = ['#c9a882', '#b8929a', '#e8dcc8', '#a8889c', '#f0eadd'];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement('div');
+      c.style.position = 'fixed';
+      c.style.top = '-20px';
+      c.style.zIndex = '4';
+      c.style.pointerEvents = 'none';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '1px';
+      c.style.width = c.style.height = (4 + Math.random() * 6) + 'px';
+      c.style.opacity = 0.8;
+      c.style.animation = `confettiFall ${2.5 + Math.random() * 3}s linear ${Math.random() * 0.6}s forwards`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 7000);
+    }
+  }
+
+  // === РЕНДЕР ===
+  function render() {
+    const isFinal = current >= steps.length;
+    const data = isFinal ? finalScreen : steps[current];
+
+    let progressHTML = '';
+    if (!isFinal) {
+      progressHTML = '<div class="progress">';
+      for (let i = 0; i < steps.length; i++) {
+        let cls = 'dot';
+        if (i < current) cls += ' active';
+        if (i === current) cls += ' active current';
+        progressHTML += `<div class="${cls}"></div>`;
+      }
+      progressHTML += '</div>';
+    }
+
+    let mediaHTML = '';
+    if (data.ring) {
+      mediaHTML = `
+        <div class="ring-scene">
+          <div class="ring-glow"></div>
+          <div class="ring">💍</div>
+        </div>`;
+    } else if (data.emoji) {
+      mediaHTML = `<span class="emoji-wrap"><span class="emoji">${data.emoji}</span></span>`;
+    }
+
+    const stepHTML = data.step ? `<span class="step-num">${data.step}</span>` : '';
+    const nameHTML = data.name ? `<span class="name">${data.name}</span>` : '';
+    const hintHTML = data.hint ? `<span class="hint">${data.hint}</span>` : '';
+
+    card.className = 'card' + (isFinal ? ' final' : '');
+    card.innerHTML = `
+      ${progressHTML}
+      ${stepHTML}
+      ${mediaHTML}
+      <h1>${nameHTML}${data.title}</h1>
+      <p>${data.text}${hintHTML}</p>
+      <button id="nextBtn"><span>${data.button}</span></button>
+    `;
+
+    document.getElementById('nextBtn').addEventListener('click', next);
+
+    if (isFinal) {
+      setTimeout(burstConfetti, 500);
+      setTimeout(burstConfetti, 2200);
+    }
+  }
+
+  function next() {
+    card.classList.add('fade-out');
+    setTimeout(() => {
+      card.classList.remove('fade-out');
+      if (current < steps.length) {
+        current++;
+        render();
+      } else {
+        burstConfetti();
+      }
+    }, 480);
+  }
+
+  // === МУЗЫКА ===
+  const musicBtn = document.getElementById('musicBtn');
+  const musicEl = document.getElementById('bgMusic');
+
+  if (MUSIC_URL) {
+    musicEl.innerHTML = `<source src="${MUSIC_URL}" type="audio/mpeg">`;
+  } else {
+    musicBtn.style.display = 'none';
+  }
+
+  musicBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      musicEl.pause();
+      musicBtn.classList.remove('playing');
+      musicBtn.textContent = '♪';
+    } else {
+      musicEl.volume = 0.3;
+      musicEl.play().catch(() => {});
+      musicBtn.classList.add('playing');
+      musicBtn.textContent = '♫';
+    }
+    isPlaying = !isPlaying;
+  });
+
+  render();
+</script>
+
+</body>
+</html>
